@@ -44,6 +44,7 @@ px4_add_romfs_files(
 	claire.aux.mix
 	claire.main.mix
 	cloudship.main.mix
+	pitcheron.main.mix
 	coax.main.mix
 	delta.main.mix
 	deltaquad.main.mix

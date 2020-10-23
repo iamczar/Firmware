@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# @name pitcheron
+# @name Pitcheron
 #
 # @url tdb
 #
-# @type pitcheron
+# @type Pitcheron
 # @class Plane
 #
 # @output MAIN1 left aileron

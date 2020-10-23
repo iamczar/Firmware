@@ -36,6 +36,8 @@ class ParameterGroup(object):
         """
         if (self.name == "Standard Plane"):
             return "Plane"
+        elif(self.name == "Pitcheron"):
+            return "Pitcheron"
         elif (self.name == "Flying Wing"):
             return "FlyingWing"
         elif (self.name == "Quadrotor x"):
