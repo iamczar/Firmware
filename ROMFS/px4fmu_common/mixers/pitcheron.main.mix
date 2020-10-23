@@ -1,0 +1,44 @@
+Pitcheron mixer for PX4FMU
+===========================
+
+Designed for Pitcheron
+
+This file defines mixers suitable for controlling a pitcheron aircraft using
+PX4FMU. The configuration assumes the elevon servos are connected to PX4FMU
+servo outputs 0 and 1. Output 2 and 3 are
+assumed to be unused.
+
+Inputs to the mixer come from channel group 0 (vehicle attitude), channels 0
+(roll) and 1 (pitch) .
+
+See the README for more information on the scaler format.
+
+Elevon mixers
+-------------
+Three scalers total (output, roll, pitch).
+
+On the assumption that the two elevon servos are physically reversed, the pitch
+input is inverted between the two servos.
+
+The scaling factor for roll inputs is adjusted to implement differential travel
+for the elevons.
+
+M: 2
+S: 0 0  -6000  -6000      0 -10000  10000
+S: 0 1   6500   6500      0 -10000  10000
+
+M: 2
+S: 0 0  -6000  -6000      0 -10000  10000
+S: 0 1  -6500  -6500      0 -10000  10000
+
+Output 2
+--------
+This mixer is empty.
+
+Z:
+
+Output 3
+-----------------
+This mixer is empty.
+
+Z:
