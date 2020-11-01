@@ -1,1 +1,1 @@
-make px4_sitl gazebo_plane
+make px4_sitl gazebo_plane__cambridge_uk_fields
