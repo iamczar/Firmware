@@ -47,7 +47,10 @@ fi
 set MAV_TYPE 1
 
 # Set mixer.
-set MIXER pitcheron
+#set MIXER pitcheron
 
 # Provide ESC a constant 1000 us pulse.
 set PWM_OUT 4
+
+set MIXER_FILE etc/mixers-sitl/delta_wing_sitl.main.mix
+set MIXER custom
