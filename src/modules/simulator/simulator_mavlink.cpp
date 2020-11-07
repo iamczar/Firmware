@@ -164,13 +164,6 @@ mavlink_hil_actuator_controls_t Simulator::actuator_controls_from_outputs()
 				msg.controls[i] = 0.0f;
 			}
 		}
-
-		// specific for pitcheron
-		if(armed)
-		{
-			msg.controls[7] = msg.controls[5];
-			msg.controls[8] = msg.controls[6];
-		}
 	}
 
 	msg.mode = mode_flag_custom;
