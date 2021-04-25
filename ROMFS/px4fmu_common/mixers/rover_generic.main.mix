@@ -13,9 +13,11 @@ Inputs to the mixer come from channel group 0 (vehicle attitude), channels 2 (ya
 See the README for more information on the scaler format.
 
 
-Output 1: Empty
+Output 1: Break
 ---------------------------------------
-Z:
+M: 1
+O: 10000 10000 0 -10000 10000 20000
+S: 0 3  -10000  -10000      0 -10000  10000
 
 Output 2: Steering mixer using yaw, with 0.5s rise time
 ---------------------------------------
