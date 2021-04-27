@@ -40,11 +40,21 @@
  */
 
 #include <px4_platform_common/log.h>
+#include <uORB/topics/input_rc.h>
+#include <px4_platform/micro_hal.h>
+
+#include </home/czar/Firmware/boards/px4/fmu-v5/src/board_config.h>
+
 
 __EXPORT int rover_with_break_app_main(int argc, char *argv[]);
 
 int rover_with_break_app_main(int argc, char *argv[])
 {
-	PX4_INFO("Starting rover with breaks apps");
+	PX4_INFO("------------------------------------------------------------------------Starting rover with breaks apps");
+
+	px4_arch_configgpio(MAIN_OUT_6);
+	px4_arch_configgpio(MAIN_OUT_7);
+	px4_arch_configgpio(MAIN_OUT_8);
+
 	return OK;
 }

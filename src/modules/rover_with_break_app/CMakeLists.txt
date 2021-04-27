@@ -29,12 +29,11 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-###########################################################################
+############################################################################
 px4_add_module(
-	MODULE modules__rover_with_break_app
+	MODULE examples__rover_with_break_app
 	MAIN rover_with_break_app
-	STACK_MAIN 2000
 	SRCS
-		rover_with_break_apps.c
+		rover_with_break_app.c
 	DEPENDS
 )
