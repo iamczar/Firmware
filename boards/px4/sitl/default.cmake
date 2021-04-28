@@ -52,8 +52,6 @@ px4_add_board(
 		rc_update
 		replay
 		rover_pos_control
-		rover_with_break_app
-
 		sensors
 		#sih
 		simulator
