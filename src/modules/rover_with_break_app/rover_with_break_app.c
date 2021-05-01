@@ -43,30 +43,30 @@
 #define RC_INTPUT_CHANNEL_7 6
 #define RC_INTPUT_CHANNEL_8 7
 
-
-
 #include <px4_platform_common/log.h>
 #include <uORB/topics/input_rc.h>
+#include <uORB/topics/relay_control.h>
+#include <uORB/topics/rc_channels.h>
 #include <px4_platform/micro_hal.h>
 
 #include </home/czar/Firmware/boards/px4/fmu-v5/src/board_config.h>
 #include <uORB/uORB.h>
 
 
-
-
 __EXPORT int rover_with_break_app_main(int argc, char *argv[]);
 
 
 
-
-void toggle_relay(uint16_t rc_input_value, bool *toggle_state, bool *is_signal_high)
+void toggle_relay(float rc_channel_value, bool *toggle_state, bool *is_signal_high)
 {
-	int pwm_threshold = 1700;
-	if(rc_input_value > pwm_threshold && *is_signal_high == false)
+	float threshold = 0.5;
+	if(rc_channel_value > threshold)
 	{
-		*toggle_state = !*toggle_state;
-		*is_signal_high = true;
+		if(false == *is_signal_high)
+		{
+			*toggle_state = !*toggle_state;
+			*is_signal_high = true;
+		}
 	}
 	else
 	{
@@ -74,10 +74,34 @@ void toggle_relay(uint16_t rc_input_value, bool *toggle_state, bool *is_signal_h
 	}
 }
 
-bool evaluate_momentary_switch(uint16_t rc_input_value)
+void handle_relay_cmd(struct relay_control_s relay,
+		      bool *toggle_state_six,
+		      bool *toggle_state_seven)
 {
-	int pwm_threshold = 1700;
-	if(rc_input_value > pwm_threshold)
+	if(RELAY_CONTROL_RELAY_FMU_MAIN_SIX == relay.relay_id)
+	{
+		if(true == relay.relay_value)
+		{
+			*toggle_state_six = !*toggle_state_six;
+		}
+	}
+	else if(RELAY_CONTROL_RELAY_FMU_MAIN_SEVEN == relay.relay_id)
+	{
+		if(true == relay.relay_value)
+		{
+			*toggle_state_seven = !*toggle_state_seven;
+		}
+	}
+	else
+	{
+		PX4_INFO("rover_with_break_app : unhandled : relay id:%d , relay value: %d\n",relay.relay_id,relay.relay_value);
+	}
+}
+
+bool evaluate_momentary_switch(float rc_channel_value)
+{
+	float threshold = 0.5;
+	if(rc_channel_value > threshold)
 	{
 		return true;
 	}
@@ -88,20 +112,22 @@ bool evaluate_momentary_switch(uint16_t rc_input_value)
 }
 
 
-
-
 int rover_with_break_app_main(int argc, char *argv[])
 {
 	PX4_INFO("Starting rover with breaks apps");
 
-	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
+	int _rc_sub = orb_subscribe(ORB_ID(rc_channels));
+	int _relay_control_sub = orb_subscribe(ORB_ID(relay_control));
 
-	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
-	struct input_rc_s rc_input;
-	//orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);
-	//px4_usleep(100000);
+
 	/* limit the update rate to 5 Hz */
 	orb_set_interval(_rc_sub, 200);
+	orb_set_interval(_relay_control_sub, 200);
+
+
+	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
+	struct rc_channels_s rc_channels_value;
+	struct relay_control_s relay;
 
 	bool toggle_state_relay_6 = false;
 	bool is_signal_high_6 = false;
@@ -109,28 +135,26 @@ int rover_with_break_app_main(int argc, char *argv[])
 	bool toggle_state_relay_7 = false;
 	bool is_signal_high_7 = false;
 
-	CONFIGURE_RELAY_ONE();
-	CONFIGURE_RELAY_TWO();
-	CONFIGURE_RELAY_MOMENTARY_SWITCH();
-
-	//bool rc_updated;
+	px4_arch_configgpio(MAIN_OUT_6);
+	px4_arch_configgpio(MAIN_OUT_7);
+	px4_arch_configgpio(MAIN_OUT_8);
 
 	while (true)
 	{
-		orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);
+		orb_copy(ORB_ID(rc_channels), _rc_sub, &rc_channels_value);
+		orb_copy(ORB_ID(relay_control), _relay_control_sub, &relay);
 
-		//orb_check(_rc_sub, &rc_updated);
+		px4_usleep(100000);
 
-		//if(rc_updated)
-		//{
-			toggle_relay(rc_input.values[RC_INTPUT_CHANNEL_6],&toggle_state_relay_6,&is_signal_high_6);
-			toggle_relay(rc_input.values[RC_INTPUT_CHANNEL_7],&toggle_state_relay_7,&is_signal_high_7);
-			bool momentary_switch_value = evaluate_momentary_switch(rc_input.values[RC_INTPUT_CHANNEL_8]);
+		toggle_relay(rc_channels_value.channels[RC_INTPUT_CHANNEL_6],&toggle_state_relay_6,&is_signal_high_6);
+		toggle_relay(rc_channels_value.channels[RC_INTPUT_CHANNEL_7],&toggle_state_relay_7,&is_signal_high_7);
+		bool momentary_switch_value = evaluate_momentary_switch(rc_channels_value.channels[RC_INTPUT_CHANNEL_8]);
 
-			RELAY_ONE(toggle_state_relay_6);
-			RELAY_ONE(toggle_state_relay_7);
-			MOMENTARY_SWITCH(momentary_switch_value);
-		//}
+		handle_relay_cmd(relay,&toggle_state_relay_6,&toggle_state_relay_7);
+
+		px4_arch_gpiowrite(MAIN_OUT_6, toggle_state_relay_6);
+		px4_arch_gpiowrite(MAIN_OUT_7, toggle_state_relay_7);
+		px4_arch_gpiowrite(MAIN_OUT_8, momentary_switch_value);
 	}
 
 	return OK;

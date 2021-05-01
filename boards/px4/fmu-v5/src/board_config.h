@@ -476,15 +476,6 @@
 
 #define BOARD_DSHOT_MOTOR_ASSIGNMENT {3, 2, 1, 0, 4, 5, 6, 7};
 
-
-#define CONFIGURE_RELAY_ONE()  px4_arch_configgpio(MAIN_OUT_6)
-#define CONFIGURE_RELAY_TWO()  px4_arch_configgpio(MAIN_OUT_7)
-#define CONFIGURE_RELAY_MOMENTARY_SWITCH()  px4_arch_configgpio(MAIN_OUT_7)
-
-#define RELAY_ONE(value) px4_arch_gpiowrite(RC_INTPUT_CHANNEL_6, (value))
-#define RELAY_TWO(value) px4_arch_gpiowrite(RC_INTPUT_CHANNEL_7, (value))
-#define MOMENTARY_SWITCH(value) px4_arch_gpiowrite(RC_INTPUT_CHANNEL_8, (value))
-
 __BEGIN_DECLS
 
 /****************************************************************************************************

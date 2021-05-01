@@ -566,6 +566,14 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 				_actuator_controls_pubs[3].publish(actuator_controls);
 			}
 		}
+	} else if (cmd_mavlink.command == MAV_CMD_DO_SET_RELAY) {
+
+		struct relay_control_s relay_control = {};
+
+		relay_control.relay_id = vehicle_command.param1;
+		relay_control.relay_value = (vehicle_command.param2 > 0);
+
+		_relay_control_pub.publish(relay_control);
 
 	} else {
 		send_ack = false;
