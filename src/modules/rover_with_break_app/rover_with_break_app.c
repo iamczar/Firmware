@@ -43,6 +43,10 @@
 #define RC_INTPUT_CHANNEL_7 6
 #define RC_INTPUT_CHANNEL_8 7
 
+#define MOMENTARY_SWITCH_RESET_COUNTER 2
+#define TOGGLE_RELAY_RESET_COUNTER 2
+
+
 #include <px4_platform_common/log.h>
 #include <uORB/topics/input_rc.h>
 #include <uORB/topics/relay_control.h>
@@ -76,26 +80,73 @@ void toggle_relay(float rc_channel_value, bool *toggle_state, bool *is_signal_hi
 
 void handle_relay_cmd(struct relay_control_s relay,
 		      bool *toggle_state_six,
-		      bool *toggle_state_seven)
+		      bool *toggle_state_seven,
+		      bool *momentary_switch_value,
+		      int *toggle_state_relay_6_counter,
+		      int *toggle_state_relay_7_counter,
+		      int *momentary_switch_counter)
 {
 	if(RELAY_CONTROL_RELAY_FMU_MAIN_SIX == relay.relay_id)
 	{
 		if(true == relay.relay_value)
 		{
-			*toggle_state_six = !*toggle_state_six;
+			if(*toggle_state_relay_6_counter < 1)
+			{
+				*toggle_state_six = !*toggle_state_six;
+			}
+
+			*toggle_state_relay_6_counter = TOGGLE_RELAY_RESET_COUNTER;
 		}
 	}
 	else if(RELAY_CONTROL_RELAY_FMU_MAIN_SEVEN == relay.relay_id)
 	{
 		if(true == relay.relay_value)
 		{
-			*toggle_state_seven = !*toggle_state_seven;
+			if(*toggle_state_relay_7_counter < 1)
+			{
+				*toggle_state_seven = !*toggle_state_seven;
+			}
+
+			*toggle_state_relay_7_counter = TOGGLE_RELAY_RESET_COUNTER;
+		}
+	}
+	else if(RELAY_CONTROL_RELAY_FMU_MAIN_EIGHT == relay.relay_id)
+	{
+		if(true == relay.relay_value)
+		{
+			*momentary_switch_counter = MOMENTARY_SWITCH_RESET_COUNTER;
 		}
 	}
 	else
 	{
 		PX4_INFO("rover_with_break_app : unhandled : relay id:%d , relay value: %d\n",relay.relay_id,relay.relay_value);
 	}
+
+	*toggle_state_relay_6_counter = *toggle_state_relay_6_counter - 1;
+	*toggle_state_relay_7_counter = *toggle_state_relay_7_counter - 1;
+
+
+	if(*toggle_state_relay_6_counter < 1)
+	{
+		*toggle_state_relay_6_counter = 0;
+	}
+
+	if(*toggle_state_relay_7_counter < 1)
+	{
+		*toggle_state_relay_7_counter = 0;
+	}
+
+	if(*momentary_switch_counter > 0)
+	{
+		*momentary_switch_counter = *momentary_switch_counter - 1;
+		*momentary_switch_value = true;
+	}
+	else
+	{
+		*momentary_switch_counter = 0;
+		*momentary_switch_value = false;
+	}
+
 }
 
 bool evaluate_momentary_switch(float rc_channel_value)
@@ -131,9 +182,16 @@ int rover_with_break_app_main(int argc, char *argv[])
 
 	bool toggle_state_relay_6 = false;
 	bool is_signal_high_6 = false;
+	int toggle_state_relay_6_counter = TOGGLE_RELAY_RESET_COUNTER;
+
 
 	bool toggle_state_relay_7 = false;
 	bool is_signal_high_7 = false;
+	int toggle_state_relay_7_counter = TOGGLE_RELAY_RESET_COUNTER;
+
+
+	bool momentary_switch_value = false;
+	int momentary_switch_counter = MOMENTARY_SWITCH_RESET_COUNTER;
 
 	px4_arch_configgpio(MAIN_OUT_6);
 	px4_arch_configgpio(MAIN_OUT_7);
@@ -148,9 +206,10 @@ int rover_with_break_app_main(int argc, char *argv[])
 
 		toggle_relay(rc_channels_value.channels[RC_INTPUT_CHANNEL_6],&toggle_state_relay_6,&is_signal_high_6);
 		toggle_relay(rc_channels_value.channels[RC_INTPUT_CHANNEL_7],&toggle_state_relay_7,&is_signal_high_7);
-		bool momentary_switch_value = evaluate_momentary_switch(rc_channels_value.channels[RC_INTPUT_CHANNEL_8]);
+		momentary_switch_value = evaluate_momentary_switch(rc_channels_value.channels[RC_INTPUT_CHANNEL_8]);
 
-		handle_relay_cmd(relay,&toggle_state_relay_6,&toggle_state_relay_7);
+		handle_relay_cmd(relay,&toggle_state_relay_6,&toggle_state_relay_7,&momentary_switch_value,
+				       &toggle_state_relay_6_counter,&toggle_state_relay_7_counter,&momentary_switch_counter);
 
 		px4_arch_gpiowrite(MAIN_OUT_6, toggle_state_relay_6);
 		px4_arch_gpiowrite(MAIN_OUT_7, toggle_state_relay_7);
