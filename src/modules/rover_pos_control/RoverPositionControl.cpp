@@ -151,7 +151,7 @@ RoverPositionControl::manual_control_setpoint_poll()
 
 					_attitude_sp_pub.publish(_att_sp);
 
-				} else {
+				} else {		
 					_act_controls.control[actuator_controls_s::INDEX_ROLL] = 0.0f; // Nominally roll: _manual_control_setpoint.y;
 					_act_controls.control[actuator_controls_s::INDEX_PITCH] = 0.0f; // Nominally pitch: -_manual_control_setpoint.x;
 					// Set heading from the manual roll input channel
@@ -159,6 +159,8 @@ RoverPositionControl::manual_control_setpoint_poll()
 						_manual_control_setpoint.y; // Nominally yaw: _manual_control_setpoint.r;
 					// Set throttle from the manual throttle channel
 					_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = _manual_control_setpoint.z;
+					_act_controls.control[actuator_controls_s::INDEX_FLAPS] = _manual_control_setpoint.aux1;
+
 					_reset_yaw_sp = true;
 				}
 

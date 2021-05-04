@@ -1931,13 +1931,22 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 			break;
 		}
 	}
+	// support for rc override rover control
+	manual_control_setpoint_s manual{};
 
-	_mavlink->send_statustext_critical("WWUUUUUUT");
+	manual.timestamp = hrt_absolute_time();
+	manual.x = (rc.values[0]-1000) / 1000.0f;    // channel 1
+	manual.y = (rc.values[1]-1000) / 1000.0f;    // channel 2
+	manual.r = (rc.values[3]-1000) / 1000.0f;    // channel 4
+	manual.z = (rc.values[2]-1000) / 1000.0f;    // channel 3
 
-	PX4_INFO(" rc.values[2] : %d",rc.values[2]);
+	manual.aux1 = (rc.values[8]-1000) / 1000.0f; // channel 9
+
+	manual.data_source = manual_control_setpoint_s::SOURCE_MAVLINK_0 + _mavlink->get_instance_id();
 
 	// publish uORB message
 	_rc_pub.publish(rc);
+	_manual_control_setpoint_pub.publish(manual);
 }
 
 void
@@ -1998,13 +2007,6 @@ MavlinkReceiver::handle_message_manual_control(mavlink_message_t *msg)
 		manual.r = man.r / 1000.0f;
 		manual.z = man.z / 1000.0f;
 		manual.data_source = manual_control_setpoint_s::SOURCE_MAVLINK_0 + _mavlink->get_instance_id();
-
-		float temp = manual.z;
-
-		PX4_INFO(" manual.y: %f",(double)temp);
-
-
-		//_mavlink->send_statustext_critical("WWUUUUUUT");
 
 		_manual_control_setpoint_pub.publish(manual);
 	}
