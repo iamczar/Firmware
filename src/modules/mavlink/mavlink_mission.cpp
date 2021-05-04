@@ -832,6 +832,10 @@ MavlinkMissionManager::handle_mission_request_both(const mavlink_message_t *msg)
 			}
 
 		} else {
+			PX4_INFO("What: %d,\n",msg->sysid);
+			PX4_INFO("What: %d,\n",_transfer_partner_sysid);
+
+
 			_mavlink->send_statustext_critical("WPM: REJ. CMD: partner id mismatch");
 
 			PX4_DEBUG("WPM: MISSION_ITEM_REQUEST(_INT) ERROR: rejected, partner ID mismatch");

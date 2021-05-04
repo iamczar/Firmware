@@ -145,6 +145,7 @@ MavlinkReceiver::acknowledge(uint8_t sysid, uint8_t compid, uint16_t command, ui
 void
 MavlinkReceiver::handle_message(mavlink_message_t *msg)
 {
+
 	switch (msg->msgid) {
 	case MAVLINK_MSG_ID_COMMAND_LONG:
 		handle_message_command_long(msg);
@@ -504,6 +505,9 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 							vehicle_command.param5, vehicle_command.param6, vehicle_command.param7);
 
 	} else if (cmd_mavlink.command == MAV_CMD_SET_CAMERA_ZOOM) {
+
+		PX4_INFO("am i getting here");
+
 		struct actuator_controls_s actuator_controls = {};
 		actuator_controls.timestamp = hrt_absolute_time();
 
@@ -513,6 +517,7 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 
 		switch ((int)(cmd_mavlink.param1 + 0.5f)) {
 		case vehicle_command_s::VEHICLE_CAMERA_ZOOM_TYPE_RANGE:
+
 			actuator_controls.control[actuator_controls_s::INDEX_CAMERA_ZOOM] = cmd_mavlink.param2 / 50.0f - 1.0f;
 			break;
 
@@ -1885,7 +1890,10 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 	rc.rc_lost_frame_count = 0;
 	rc.rc_total_frame_count = 1;
 	rc.rc_ppm_frame_length = 0;
-	rc.input_source = input_rc_s::RC_INPUT_SOURCE_MAVLINK;
+	//rc.input_source = input_rc_s::RC_INPUT_SOURCE_MAVLINK;
+	rc.input_source = input_rc_s::RC_INPUT_SOURCE_PX4IO_PPM;
+
+
 
 	// channels
 	rc.values[0] = man.chan1_raw;
@@ -1907,6 +1915,7 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 	rc.values[16] = man.chan17_raw;
 	rc.values[17] = man.chan18_raw;
 
+
 	// check how many channels are valid
 	for (int i = 17; i >= 0; i--) {
 		const bool ignore_max = rc.values[i] == UINT16_MAX; // ignore any channel with value UINT16_MAX
@@ -1922,6 +1931,10 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 			break;
 		}
 	}
+
+	_mavlink->send_statustext_critical("WWUUUUUUT");
+
+	PX4_INFO(" rc.values[2] : %d",rc.values[2]);
 
 	// publish uORB message
 	_rc_pub.publish(rc);
@@ -1951,6 +1964,7 @@ MavlinkReceiver::handle_message_manual_control(mavlink_message_t *msg)
 		rc.rc_total_frame_count = 1;
 		rc.rc_ppm_frame_length = 0;
 		rc.input_source = input_rc_s::RC_INPUT_SOURCE_MAVLINK;
+
 		rc.rssi = RC_INPUT_RSSI_MAX;
 
 		rc.values[0] = man.x / 2 + 1500;	// roll
@@ -1984,6 +1998,13 @@ MavlinkReceiver::handle_message_manual_control(mavlink_message_t *msg)
 		manual.r = man.r / 1000.0f;
 		manual.z = man.z / 1000.0f;
 		manual.data_source = manual_control_setpoint_s::SOURCE_MAVLINK_0 + _mavlink->get_instance_id();
+
+		float temp = manual.z;
+
+		PX4_INFO(" manual.y: %f",(double)temp);
+
+
+		//_mavlink->send_statustext_critical("WWUUUUUUT");
 
 		_manual_control_setpoint_pub.publish(manual);
 	}
