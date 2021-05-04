@@ -1907,6 +1907,8 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 	rc.values[16] = man.chan17_raw;
 	rc.values[17] = man.chan18_raw;
 
+
+
 	// check how many channels are valid
 	for (int i = 17; i >= 0; i--) {
 		const bool ignore_max = rc.values[i] == UINT16_MAX; // ignore any channel with value UINT16_MAX
@@ -1922,6 +1924,10 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 			break;
 		}
 	}
+
+	//_mavlink->send_statustext_critical("WWUUUUUUT");
+
+	//PX4_INFO(" rc.values[2] : %d",rc.values[2]);
 
 	// publish uORB message
 	_rc_pub.publish(rc);
