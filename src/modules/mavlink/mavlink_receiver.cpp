@@ -1934,8 +1934,6 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 
 	manual.timestamp = hrt_absolute_time();
 
-
-	//manual.x = ((rc.values[1]-1500)*2) / 1000.0f;    // channel 1
 	manual.x = map_rc_channel_override_to_manual_control(rc.values[1]);    // channel 1
 	manual.y = map_rc_channel_override_to_manual_control(rc.values[0]);    // channel 2
 	manual.r = map_rc_channel_override_to_manual_control(rc.values[3]);    // channel 4
