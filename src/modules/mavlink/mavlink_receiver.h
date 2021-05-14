@@ -202,7 +202,7 @@ private:
 	void handle_message_gimbal_manager_set_manual_control(mavlink_message_t *msg);
 	void handle_message_gimbal_device_information(mavlink_message_t *msg);
 
-	double map_rc_channel_override_to_manual_control(uint16_t value);
+	float map_rc_channel_override_to_manual_control(uint16_t value);
 
 #if !defined(CONSTRAINED_FLASH)
 	void handle_message_debug(mavlink_message_t *msg);

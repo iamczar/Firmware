@@ -1934,10 +1934,8 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 
 	manual.timestamp = hrt_absolute_time();
 
-	// # NOTE potential devide by zero problem
 
-
-
+	//manual.x = ((rc.values[1]-1500)*2) / 1000.0f;    // channel 1
 	manual.x = map_rc_channel_override_to_manual_control(rc.values[1]);    // channel 1
 	manual.y = map_rc_channel_override_to_manual_control(rc.values[0]);    // channel 2
 	manual.r = map_rc_channel_override_to_manual_control(rc.values[3]);    // channel 4
@@ -1953,7 +1951,7 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 	_manual_control_setpoint_pub.publish(manual);
 }
 
-double MavlinkReceiver::map_rc_channel_override_to_manual_control(uint16_t value)
+float MavlinkReceiver::map_rc_channel_override_to_manual_control(uint16_t value)
 {
 	auto normalisedValue = value - 1500;
 
@@ -1969,7 +1967,7 @@ double MavlinkReceiver::map_rc_channel_override_to_manual_control(uint16_t value
 		mappedValue = normalisedValue;
 	}
 
-	return ((mappedValue-1500)*2) / 1000.0f;
+	return ((mappedValue)*2) / 1000.0f;
 }
 
 void
