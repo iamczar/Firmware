@@ -151,7 +151,9 @@ RoverPositionControl::manual_control_setpoint_poll()
 
 					_attitude_sp_pub.publish(_att_sp);
 
-				} else {		
+				} else {
+
+
 					_act_controls.control[actuator_controls_s::INDEX_ROLL] = 0.0f; // Nominally roll: _manual_control_setpoint.y;
 					_act_controls.control[actuator_controls_s::INDEX_PITCH] = 0.0f; // Nominally pitch: -_manual_control_setpoint.x;
 					// Set heading from the manual roll input channel
@@ -159,7 +161,8 @@ RoverPositionControl::manual_control_setpoint_poll()
 						_manual_control_setpoint.y; // Nominally yaw: _manual_control_setpoint.r;
 					// Set throttle from the manual throttle channel
 					_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = _manual_control_setpoint.z;
-					_act_controls.control[actuator_controls_s::INDEX_FLAPS] = _manual_control_setpoint.aux1;
+
+					handle_shifter();
 
 					_reset_yaw_sp = true;
 				}
@@ -171,6 +174,21 @@ RoverPositionControl::manual_control_setpoint_poll()
 			_manual_setpoint_last_called = hrt_absolute_time();
 		}
 	}
+}
+
+void RoverPositionControl::handle_shifter()
+{
+	// used for the gear shifter
+	if(_manual_control_setpoint.aux1 > 0.5f)
+	{
+		_gearShiftValue = 1;
+	}
+	else if(_manual_control_setpoint.aux1 < -0.5f)
+	{
+		_gearShiftValue = -1;
+	}
+
+	_act_controls.control[actuator_controls_s::INDEX_FLAPS] = _gearShiftValue;
 }
 
 void
@@ -483,6 +501,7 @@ RoverPositionControl::Run()
 		    _control_mode.flag_control_attitude_enabled ||
 		    _control_mode.flag_control_position_enabled ||
 		    _control_mode.flag_control_manual_enabled) {
+
 			// timestamp and publish controls
 			_act_controls.timestamp = hrt_absolute_time();
 			_actuator_controls_pub.publish(_act_controls);

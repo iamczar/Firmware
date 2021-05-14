@@ -72,6 +72,7 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/actuator_controls.h>
+//#include <modules/mavlink/mavlink_main.h>
 
 using matrix::Dcmf;
 
@@ -191,6 +192,8 @@ private:
 		(ParamFloat<px4::params::NAV_LOITER_RAD>) _param_nav_loiter_rad	/**< loiter radius for Rover */
 	)
 
+	//Mavlink				*_mavlink;
+
 	/**
 	 * Update our local parameter cache.
 	 */
@@ -209,5 +212,8 @@ private:
 					 const position_setpoint_triplet_s &_pos_sp_triplet);
 	void		control_velocity(const matrix::Vector3f &current_velocity);
 	void		control_attitude(const vehicle_attitude_s &att, const vehicle_attitude_setpoint_s &att_sp);
+
+	float _gearShiftValue = 0;
+	void handle_shifter();
 
 };

@@ -506,8 +506,6 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 
 	} else if (cmd_mavlink.command == MAV_CMD_SET_CAMERA_ZOOM) {
 
-		PX4_INFO("am i getting here");
-
 		struct actuator_controls_s actuator_controls = {};
 		actuator_controls.timestamp = hrt_absolute_time();
 
@@ -1935,18 +1933,43 @@ MavlinkReceiver::handle_message_rc_channels_override(mavlink_message_t *msg)
 	manual_control_setpoint_s manual{};
 
 	manual.timestamp = hrt_absolute_time();
-	manual.x = ((rc.values[1]-1500)*2) / 1000.0f;    // channel 1
-	manual.y = ((rc.values[0]-1500)*2) / 1000.0f;    // channel 2
-	manual.r = ((rc.values[3]-1500)*2) / 1000.0f;    // channel 4
-	manual.z = ((rc.values[2]-1500)*2) / 1000.0f;    // channel 3
 
-	manual.aux1 = ((rc.values[8]-1500)*2) / 1000.0f; // channel 9
+	// # NOTE potential devide by zero problem
+
+
+
+	manual.x = map_rc_channel_override_to_manual_control(rc.values[1]);    // channel 1
+	manual.y = map_rc_channel_override_to_manual_control(rc.values[0]);    // channel 2
+	manual.r = map_rc_channel_override_to_manual_control(rc.values[3]);    // channel 4
+	manual.z = map_rc_channel_override_to_manual_control(rc.values[2]);    // channel 3
+
+	// used for the shifter
+	manual.aux1 = map_rc_channel_override_to_manual_control(rc.values[8]); // channel 9
 
 	manual.data_source = manual_control_setpoint_s::SOURCE_MAVLINK_0 + _mavlink->get_instance_id();
 
 	// publish uORB message
 	_rc_pub.publish(rc);
 	_manual_control_setpoint_pub.publish(manual);
+}
+
+double MavlinkReceiver::map_rc_channel_override_to_manual_control(uint16_t value)
+{
+	auto normalisedValue = value - 1500;
+
+	auto mappedValue = 0;
+
+	// so we dont get a devide by zero
+	if(0 == normalisedValue)
+	{
+		mappedValue = 1;
+	}
+	else
+	{
+		mappedValue = normalisedValue;
+	}
+
+	return ((mappedValue-1500)*2) / 1000.0f;
 }
 
 void
