@@ -72,7 +72,6 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/actuator_controls.h>
-//#include <modules/mavlink/mavlink_main.h>
 
 using matrix::Dcmf;
 
@@ -194,8 +193,6 @@ private:
 		(ParamFloat<px4::params::ROV_GEAR_SRV_MAX>) _param_rover_gear_shift_position_max,
 		(ParamFloat<px4::params::ROV_GEAR_SRV_MIN>) _param_rover_gear_shift_position_min
 	)
-
-	//Mavlink				*_mavlink;
 
 	/**
 	 * Update our local parameter cache.
