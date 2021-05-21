@@ -497,6 +497,17 @@ RoverPositionControl::Run()
 
 		}
 
+		// if the rover is in HOLD MODE/POSITION MODE
+		if(_control_mode.flag_control_velocity_enabled &&
+		    _control_mode.flag_control_attitude_enabled &&
+		    _control_mode.flag_control_position_enabled)
+		{
+			// break - this is a bit dangerous
+			_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = -1.0;
+		}
+
+
+
 		/* Only publish if any of the proper modes are enabled */
 		if (_control_mode.flag_control_velocity_enabled ||
 		    _control_mode.flag_control_attitude_enabled ||
