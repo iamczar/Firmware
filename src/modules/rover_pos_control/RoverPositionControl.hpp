@@ -189,7 +189,10 @@ private:
 		(ParamFloat<px4::params::GND_WHEEL_BASE>) _param_wheel_base,
 		(ParamFloat<px4::params::GND_MAX_ANG>) _param_max_turn_angle,
 		(ParamFloat<px4::params::GND_MAN_Y_MAX>) _param_gnd_man_y_max,
-		(ParamFloat<px4::params::NAV_LOITER_RAD>) _param_nav_loiter_rad	/**< loiter radius for Rover */
+		(ParamFloat<px4::params::NAV_LOITER_RAD>) _param_nav_loiter_rad,
+
+		(ParamFloat<px4::params::ROV_GEAR_SRV_MAX>) _param_rover_gear_shift_position_max,
+		(ParamFloat<px4::params::ROV_GEAR_SRV_MIN>) _param_rover_gear_shift_position_min
 	)
 
 	//Mavlink				*_mavlink;

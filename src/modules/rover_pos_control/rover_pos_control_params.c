@@ -285,3 +285,23 @@ PARAM_DEFINE_FLOAT(GND_MAX_ANG, 0.7854f);
  * @group Rover Position Control
  */
 PARAM_DEFINE_FLOAT(GND_MAN_Y_MAX, 150.0f);
+
+/**
+ * Max relative gear shifter servo position
+ *
+ * @min 0
+ * @max 1.0
+ * @decimal 1
+ * @group Rover Position Control
+ */
+PARAM_DEFINE_FLOAT(ROV_GEAR_SRV_MAX, 1.0f);
+
+/**
+ * Min relative gear shifter servo position
+ *
+ * @min -1
+ * @max 0
+ * @decimal 1
+ * @group Rover Position Control
+ */
+PARAM_DEFINE_FLOAT(ROV_GEAR_SRV_MIN, -1.0f);

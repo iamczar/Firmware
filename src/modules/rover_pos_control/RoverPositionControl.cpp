@@ -159,6 +159,7 @@ RoverPositionControl::manual_control_setpoint_poll()
 					// Set heading from the manual roll input channel
 					_act_controls.control[actuator_controls_s::INDEX_YAW] =
 						_manual_control_setpoint.y; // Nominally yaw: _manual_control_setpoint.r;
+
 					// Set throttle from the manual throttle channel
 					_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = _manual_control_setpoint.z;
 
@@ -181,11 +182,11 @@ void RoverPositionControl::handle_shifter()
 	// used for the gear shifter
 	if(_manual_control_setpoint.aux1 > 0.5f)
 	{
-		_gearShiftValue = 1;
+		_gearShiftValue = _param_rover_gear_shift_position_max.get();
 	}
 	else if(_manual_control_setpoint.aux1 < -0.5f)
 	{
-		_gearShiftValue = -1;
+		_gearShiftValue = _param_rover_gear_shift_position_min.get();
 	}
 
 	_act_controls.control[actuator_controls_s::INDEX_FLAPS] = _gearShiftValue;
