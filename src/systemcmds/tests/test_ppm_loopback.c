@@ -148,6 +148,8 @@ int test_ppm_loopback(int argc, char *argv[])
 
 		// int ppm_fd = open(RC_INPUT_DEVICE_PATH, O_RDONLY);
 
+
+
 		// struct input_rc_s rc;
 		// result = read(ppm_fd, &rc, sizeof(rc));
 

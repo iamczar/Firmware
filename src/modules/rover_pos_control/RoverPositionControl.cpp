@@ -152,14 +152,11 @@ RoverPositionControl::manual_control_setpoint_poll()
 					_attitude_sp_pub.publish(_att_sp);
 
 				} else {
-
-
 					_act_controls.control[actuator_controls_s::INDEX_ROLL] = 0.0f; // Nominally roll: _manual_control_setpoint.y;
 					_act_controls.control[actuator_controls_s::INDEX_PITCH] = 0.0f; // Nominally pitch: -_manual_control_setpoint.x;
 					// Set heading from the manual roll input channel
 					_act_controls.control[actuator_controls_s::INDEX_YAW] =
 						_manual_control_setpoint.y; // Nominally yaw: _manual_control_setpoint.r;
-
 					// Set throttle from the manual throttle channel
 					_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = _manual_control_setpoint.z;
 
@@ -509,11 +506,10 @@ RoverPositionControl::Run()
 
 		}
 
-		// if the rover is in HOLD MODE/POSITION MODE
 		if(_control_mode.flag_control_termination_enabled)
 		{
 
-			PX4_INFO("I am also getting here");
+			PX4_INFO("failsafe enables");
 			// break - this is a bit dangerous
 			//_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = 0.0f;
 		}
@@ -525,7 +521,6 @@ RoverPositionControl::Run()
 		    _control_mode.flag_control_attitude_enabled ||
 		    _control_mode.flag_control_position_enabled ||
 		    _control_mode.flag_control_manual_enabled) {
-
 			// timestamp and publish controls
 			_act_controls.timestamp = hrt_absolute_time();
 			_actuator_controls_pub.publish(_act_controls);
