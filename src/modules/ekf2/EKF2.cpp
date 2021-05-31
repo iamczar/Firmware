@@ -170,6 +170,7 @@ EKF2::~EKF2()
 	perf_free(_ecl_ekf_update_perf);
 	perf_free(_ecl_ekf_update_full_perf);
 	perf_free(_imu_missed_perf);
+	perf_free(_mag_missed_perf);
 }
 
 bool EKF2::multi_init(int imu, int mag)
@@ -194,12 +195,11 @@ bool EKF2::multi_init(int imu, int mag)
 	_estimator_visual_odometry_aligned_pub.advertised();
 	_yaw_est_pub.advertise();
 
-	_vehicle_imu_sub.ChangeInstance(imu);
-	_magnetometer_sub.ChangeInstance(mag);
+	bool changed_instance = _vehicle_imu_sub.ChangeInstance(imu) && _magnetometer_sub.ChangeInstance(mag);
 
 	const int status_instance = _estimator_states_pub.get_instance();
 
-	if ((status_instance >= 0)
+	if ((status_instance >= 0) && changed_instance
 	    && (_attitude_pub.get_instance() == status_instance)
 	    && (_local_position_pub.get_instance() == status_instance)
 	    && (_global_position_pub.get_instance() == status_instance)) {
@@ -223,6 +223,11 @@ int EKF2::print_status()
 	perf_print_counter(_ecl_ekf_update_perf);
 	perf_print_counter(_ecl_ekf_update_full_perf);
 	perf_print_counter(_imu_missed_perf);
+
+	if (_device_id_mag != 0) {
+		perf_print_counter(_mag_missed_perf);
+	}
+
 	return 0;
 }
 
@@ -1518,8 +1523,9 @@ void EKF2::UpdateMagSample(ekf2_timestamps_s &ekf2_timestamps)
 	if (_magnetometer_sub.update(&magnetometer)) {
 
 		if (_magnetometer_sub.get_last_generation() != last_generation + 1) {
-			PX4_ERR("%d - vehicle_magnetometer lost, generation %d -> %d", _instance, last_generation,
-				_magnetometer_sub.get_last_generation());
+			perf_count(_mag_missed_perf);
+			PX4_DEBUG("%d - vehicle_magnetometer lost, generation %d -> %d", _instance, last_generation,
+				  _magnetometer_sub.get_last_generation());
 		}
 
 		bool reset = false;
@@ -1743,7 +1749,8 @@ int EKF2::task_spawn(int argc, char *argv[])
 
 		while ((multi_instances_allocated < multi_instances)
 		       && (vehicle_status_sub.get().arming_state != vehicle_status_s::ARMING_STATE_ARMED)
-		       && (hrt_elapsed_time(&time_started) < 30_s)) {
+		       && ((hrt_elapsed_time(&time_started) < 30_s)
+			   || (vehicle_status_sub.get().hil_state == vehicle_status_s::HIL_STATE_ON))) {
 
 			vehicle_status_sub.update();
 
