@@ -564,6 +564,18 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 		relay_control.relay_id = vehicle_command.param1;
 		relay_control.relay_value = (vehicle_command.param2 > 0);
 
+		mavlink_channel_t mavlink_channel = MAVLINK_COMM_0;
+
+		mavlink_command_long_t packet;
+    		packet.param1 = relay_control.relay_id;
+    		packet.param2 = relay_control.relay_value ;
+    		packet.command = MAV_CMD_DO_SET_RELAY;
+    		packet.target_system = 1;
+    		packet.target_component = 200;
+    		packet.confirmation = 1;
+
+		mavlink_msg_command_long_send_struct(mavlink_channel,&packet);
+
 		_relay_control_pub.publish(relay_control);
 
 	} else {
