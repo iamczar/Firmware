@@ -567,8 +567,8 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 		mavlink_channel_t mavlink_channel = MAVLINK_COMM_0;
 
 		mavlink_command_long_t packet;
-    		packet.param1 = relay_control.relay_id;
-    		packet.param2 = relay_control.relay_value ;
+    		packet.param1 = vehicle_command.param1;
+    		packet.param2 = vehicle_command.param2;
     		packet.command = MAV_CMD_DO_SET_RELAY;
     		packet.target_system = 1;
     		packet.target_component = 200;
