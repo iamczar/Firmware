@@ -21,7 +21,7 @@ rover_pos_control start
 #
 # Start Rover Apps with Break
 #
-rover_with_break_app start
+#rover_with_break_app start
 
 
 #
