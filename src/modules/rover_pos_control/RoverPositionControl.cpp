@@ -176,14 +176,26 @@ RoverPositionControl::manual_control_setpoint_poll()
 
 void RoverPositionControl::handle_shifter()
 {
-	// used for the gear shifter
-	if(_manual_control_setpoint.aux1 > 0.5f)
+	if(_relay_control_sub.copy(&_relay_control))
 	{
-		_gearShiftValue = _param_rover_gear_shift_position_max.get();
-	}
-	else if(_manual_control_setpoint.aux1 < -0.5f)
-	{
-		_gearShiftValue = _param_rover_gear_shift_position_min.get();
+		// gear shift up
+		if(3 == _relay_control.relay_id)
+		{
+			if (_relay_control.relay_value)
+			{
+				_gearShiftValue = _param_rover_gear_shift_position_max.get();
+			}
+
+		}
+
+		// gear shift down
+		if(4 == _relay_control.relay_id)
+		{
+			if (_relay_control.relay_value)
+			{
+				_gearShiftValue = _param_rover_gear_shift_position_min.get();
+			}
+		}
 	}
 
 	_act_controls.control[actuator_controls_s::INDEX_FLAPS] = _gearShiftValue;
