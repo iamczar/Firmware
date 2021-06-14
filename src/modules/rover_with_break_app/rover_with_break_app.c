@@ -59,8 +59,6 @@
 
 __EXPORT int rover_with_break_app_main(int argc, char *argv[]);
 
-
-
 void toggle_relay(float rc_channel_value, bool *toggle_state, bool *is_signal_high)
 {
 	float threshold = 0.5;

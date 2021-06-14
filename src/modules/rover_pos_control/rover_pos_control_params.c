@@ -305,3 +305,13 @@ PARAM_DEFINE_FLOAT(ROV_GEAR_SRV_MAX, 1.0f);
  * @group Rover Position Control
  */
 PARAM_DEFINE_FLOAT(ROV_GEAR_SRV_MIN, -1.0f);
+
+/**
+ * brake range multiplier
+ *
+ * @min 1
+ * @max 5
+ * @decimal 1
+ * @group Rover Position Control
+ */
+PARAM_DEFINE_FLOAT(ROV_BRAKE_MUL, 1.0f);

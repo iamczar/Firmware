@@ -159,6 +159,7 @@ RoverPositionControl::manual_control_setpoint_poll()
 						_manual_control_setpoint.y; // Nominally yaw: _manual_control_setpoint.r;
 					// Set throttle from the manual throttle channel
 					_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = _manual_control_setpoint.z;
+					_act_controls.control[actuator_controls_s::INDEX_AIRBRAKES] = scale_brake_value(_manual_control_setpoint.z);
 
 					handle_shifter();
 
@@ -199,6 +200,15 @@ void RoverPositionControl::handle_shifter()
 	}
 
 	_act_controls.control[actuator_controls_s::INDEX_FLAPS] = _gearShiftValue;
+}
+
+float RoverPositionControl::scale_brake_value(float brake_value)
+{
+	float brake = brake_value * _param_rover_break_multiplier.get();
+
+	brake = math::constrain(brake, -1.0f, 1.0f);
+
+	return brake;
 }
 
 void
@@ -314,6 +324,7 @@ RoverPositionControl::control_position(const matrix::Vector2d &current_position,
 					_gnd_control.navigate_waypoints(prev_wp, curr_wp, current_position, ground_speed_2d);
 
 					_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = mission_throttle;
+					_act_controls.control[actuator_controls_s::INDEX_AIRBRAKES] = scale_brake_value(mission_throttle);
 
 					float desired_r = ground_speed_2d.norm_squared() / math::abs_t(_gnd_control.nav_lateral_acceleration_demand());
 					float desired_theta = (0.5f * M_PI_F) - atan2f(desired_r, _param_wheel_base.get());
@@ -328,6 +339,9 @@ RoverPositionControl::control_position(const matrix::Vector2d &current_position,
 		case STOPPING: {
 				_act_controls.control[actuator_controls_s::INDEX_YAW] = 0.0f;
 				_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = 0.0f;
+
+				_act_controls.control[actuator_controls_s::INDEX_AIRBRAKES] = -1.0f;
+
 				// Note _prev_wp is different to the local prev_wp which is related to a mission waypoint.
 				float dist_between_waypoints = get_distance_to_next_waypoint((double)_prev_wp(0), (double)_prev_wp(1),
 							       (double)curr_wp(0), (double)curr_wp(1));
@@ -377,6 +391,8 @@ RoverPositionControl::control_velocity(const matrix::Vector3f &current_velocity)
 		//Constrain maximum throttle to mission throttle
 		_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = math::constrain(control_throttle, 0.0f, mission_throttle);
 
+		_act_controls.control[actuator_controls_s::INDEX_AIRBRAKES] = scale_brake_value(control_throttle);
+
 		Vector3f desired_body_velocity;
 
 		if (_velocity_frame == VelocityFrame::NED) {
@@ -396,6 +412,9 @@ RoverPositionControl::control_velocity(const matrix::Vector3f &current_velocity)
 	} else {
 
 		_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = 0.0f;
+
+		_act_controls.control[actuator_controls_s::INDEX_AIRBRAKES] = -1.0f;
+
 		_act_controls.control[actuator_controls_s::INDEX_YAW] = 0.0f;
 	}
 }
@@ -415,7 +434,7 @@ RoverPositionControl::control_attitude(const vehicle_attitude_s &att, const vehi
 	const float control_throttle = att_sp.thrust_body[0];
 
 	_act_controls.control[actuator_controls_s::INDEX_THROTTLE] =  math::constrain(control_throttle, 0.0f, 1.0f);
-
+	_act_controls.control[actuator_controls_s::INDEX_AIRBRAKES] =  math::constrain(control_throttle, -1.0f, 1.0f);
 }
 
 void
@@ -523,7 +542,7 @@ RoverPositionControl::Run()
 
 			PX4_INFO("failsafe enables");
 			// break - this is a bit dangerous
-			//_act_controls.control[actuator_controls_s::INDEX_THROTTLE] = 0.0f;
+			_act_controls.control[actuator_controls_s::INDEX_AIRBRAKES] = 0.0f;
 		}
 
 

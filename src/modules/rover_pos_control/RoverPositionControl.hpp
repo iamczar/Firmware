@@ -196,7 +196,9 @@ private:
 		(ParamFloat<px4::params::NAV_LOITER_RAD>) _param_nav_loiter_rad,
 
 		(ParamFloat<px4::params::ROV_GEAR_SRV_MAX>) _param_rover_gear_shift_position_max,
-		(ParamFloat<px4::params::ROV_GEAR_SRV_MIN>) _param_rover_gear_shift_position_min
+		(ParamFloat<px4::params::ROV_GEAR_SRV_MIN>) _param_rover_gear_shift_position_min,
+
+		(ParamFloat<px4::params::ROV_BRAKE_MUL>) _param_rover_break_multiplier
 	)
 
 	/**
@@ -220,5 +222,6 @@ private:
 
 	float _gearShiftValue = 0;
 	void handle_shifter();
+	float scale_brake_value(float brake_value);
 
 };
